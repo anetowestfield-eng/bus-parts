@@ -709,9 +709,6 @@
                      <div className="font-semibold">Showing: <span className="text-blue-600">{filteredData.length}</span></div>
                   </div>
                   {rawInventoryData.length > inventoryData.length && (
-                    <div className="flex items-center gap-1 text-amber-600">
-                       <span className="flex items-center gap-1"><AlertCircleIcon className="w-4 h-4" /> {rawInventoryData.length - inventoryData.length} duplicates hidden</span>
-                    </div>
                   )}
                 </div>
 
@@ -800,3 +797,4 @@
     </script>
 </body>
 </html>
+
