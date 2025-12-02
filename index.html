@@ -132,7 +132,7 @@
             { brand: "New Flyer", description: "Thermostat", partNumber: "75312", notes: "" },
             { brand: "New Flyer", description: "Brake Application Valve", partNumber: "73032", notes: "" },
             { brand: "New Flyer", description: "Coolant Level Sensor", partNumber: "78010", notes: "" },
-            { brand: "New Flyer", description: "ECM", partNumber: "40002", notes: "" },
+            { brand: "New Flyer", description: "ECM / Timing Gear Cover", partNumber: "40002", notes: "Notebook: ECM, Wall: Timing Gear Cover" },
             { brand: "New Flyer", description: "Surge Tank", partNumber: "75113", notes: "" },
             { brand: "New Flyer", description: "Water Pump", partNumber: "34483", notes: "" },
             { brand: "New Flyer", description: "Water Pump Belt", partNumber: "34322", notes: "" },
@@ -176,7 +176,7 @@
             { brand: "New Flyer", description: "Surge Tank Cap", partNumber: "72929", notes: "" },
             { brand: "New Flyer", description: "Turbo Sensor", partNumber: "78013", notes: "" },
             { brand: "New Flyer", description: "Auto Drain Assembly", partNumber: "509288", notes: "" },
-            { brand: "New Flyer", description: "Spark Plugs", partNumber: "78012", notes: "" },
+            { brand: "New Flyer", description: "Spark Plugs / Coolant Probe", partNumber: "78012", notes: "Notebook: Spark Plugs, Wall: Coolant Probe" },
             { brand: "New Flyer", description: "Coils", partNumber: "34337", notes: "" },
             { brand: "New Flyer", description: "ICM", partNumber: "34411", notes: "" },
             { brand: "New Flyer", description: "ICM Harness", partNumber: "40040", notes: "" },
@@ -283,7 +283,24 @@
             { brand: "Universal", description: "Fuel Outlet Pressure/Temp Sensor", partNumber: "33678", notes: "" },
             { brand: "Universal", description: "Fuel Inlet Sensor", partNumber: "80975", notes: "" },
             { brand: "Universal", description: "Dual Sensor", partNumber: "75272", notes: "" },
-            { brand: "Sticky Note", description: "Unknown", partNumber: "635921 / 635619", notes: "" }
+            { brand: "Sticky Note", description: "Unknown", partNumber: "635921 / 635619", notes: "" },
+            // --- NEW WALL DATA ---
+            { brand: "Universal", description: "Old Part (Wall)", partNumber: "5682528", notes: "" },
+            { brand: "Universal", description: "SCR Temp Sensor", partNumber: "80959", notes: "From Wall" },
+            { brand: "Universal", description: "DEF Valve", partNumber: "80404", notes: "From Wall (alt 80464?)" },
+            { brand: "Universal", description: "Comp Hose", partNumber: "79356", notes: "From Wall" },
+            { brand: "Universal", description: "Turbo Clamp/Bolt", partNumber: "79362", notes: "From Wall" },
+            { brand: "Universal", description: "VGT Harness", partNumber: "81141", notes: "From Wall" },
+            { brand: "Gillig", description: "Horn Switch (Wall)", partNumber: "79704", notes: "From Wall" },
+            { brand: "Universal", description: "Rear Door Relay (K-Touch)", partNumber: "7506200", notes: "From Wall" },
+            { brand: "Gillig", description: "Voltage Regulator (Wall)", partNumber: "80723", notes: "From Wall" },
+            { brand: "Universal", description: "Brass Fitting Wet Tank Gov", partNumber: "80458", notes: "From Wall" },
+            { brand: "Universal", description: "Fuel Pump Actuator", partNumber: "438422", notes: "From Wall" },
+            { brand: "Universal", description: "Hose Reservoir to Pump", partNumber: "79338", notes: "From Wall" },
+            { brand: "Universal", description: "Quick Connect Dosing Valve", partNumber: "80187", notes: "From Wall" },
+            { brand: "Universal", description: "Coolant Part/Kit", partNumber: "78016", notes: "From Wall" },
+            { brand: "Universal", description: "Unknown Wall Part", partNumber: "80685", notes: "From Wall" },
+            { brand: "Universal", description: "Unknown Wall Part", partNumber: "48936", notes: "From Wall" }
           ];
 
           // Logic to deduplicate based on partNumber
@@ -301,8 +318,9 @@
                 if (item.notes && !existing.notes) {
                   existing.notes = item.notes;
                 }
-                if (item.description.length > existing.description.length) {
-                  existing.description = item.description;
+                // Append description if different and not just a brand change
+                if (item.description !== existing.description) {
+                   existing.description = existing.description + " / " + item.description;
                 }
               }
             });
@@ -464,3 +482,5 @@
     </script>
 </body>
 </html>
+
+
