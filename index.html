@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Parts Inventory</title>
+    
+    <!-- React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // --- Icons (SVG Components) ---
+        const SearchIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        );
+        const PackageIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m16.5 9.4-9-5.19"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        );
+        const WrenchIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        );
+        const HashIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+        );
+        const FileTextIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        );
+        const AlertCircleIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        );
+
+        const InventoryGrid = () => {
+          const [searchTerm, setSearchTerm] = useState('');
+          const [sortConfig, setSortConfig] = useState({ key: 'brand', direction: 'ascending' });
+
+          const rawInventoryData = [
+            // --- GILLIG ---
+            { brand: "Gillig", description: "Exhaust Clamp", partNumber: "78762", notes: "" },
+            { brand: "Gillig", description: "Rear Air Spring (Air Bellow)", partNumber: "79691", notes: "See also Front 80480" },
+            { brand: "Gillig", description: "Side Skirt Mounting Bracket", partNumber: "78303 / 78304", notes: "Also noted: 80275 / 80276" },
+            { brand: "Gillig", description: "Outside Step Light (3 holes)", partNumber: "78635 / 78636", notes: "" },
+            { brand: "Gillig", description: "Double Concept", partNumber: "79653", notes: "" },
+            { brand: "Gillig", description: "Shock / Lower Rear Big Nut", partNumber: "79040", notes: "" },
+            { brand: "Gillig", description: "Water Pump", partNumber: "80961", notes: "" },
+            { brand: "Gillig", description: "Water Pump Belt", partNumber: "78552", notes: "" },
+            { brand: "Gillig", description: "Coolant Cap", partNumber: "80649", notes: "" },
+            { brand: "Gillig", description: "Crank Case with Sensor", partNumber: "81008", notes: "" },
+            { brand: "Gillig", description: "Drag Link", partNumber: "80498", notes: "" },
+            { brand: "Gillig", description: "Rear Lower Radius Rod", partNumber: "79612", notes: "" },
+            { brand: "Gillig", description: "Front Oil Seal", partNumber: "30694 / 4024883", notes: "Front Engine" },
+            { brand: "Gillig", description: "Center Link (1900s)", partNumber: "30165", notes: "" },
+            { brand: "Gillig", description: "Idler Pulley", partNumber: "49506", notes: "Bolt: 49564 / Washer: 49674" },
+            { brand: "Gillig", description: "Governor (7000s)", partNumber: "78326", notes: "" },
+            { brand: "Gillig", description: "Shock (Big Hole)", partNumber: "79771", notes: "" },
+            { brand: "Gillig", description: "Shock (Small Hole)", partNumber: "79772", notes: "" },
+            { brand: "Gillig", description: "Tensioner", partNumber: "31375", notes: "" },
+            { brand: "Gillig", description: "Alternator", partNumber: "79618", notes: "" },
+            { brand: "Gillig", description: "Fuel Control Valve", partNumber: "28838", notes: "" },
+            { brand: "Gillig", description: "Fuel Pump", partNumber: "80965", notes: "" },
+            { brand: "Gillig", description: "Fuel Pump O-Ring (Big)", partNumber: "80984", notes: "" },
+            { brand: "Gillig", description: "Fuel Pump O-Ring (Small)", partNumber: "40015", notes: "" },
+            { brand: "Gillig", description: "Side Windshield", partNumber: "40227", notes: "" },
+            { brand: "Gillig", description: "CNG Cluster", partNumber: "80922", notes: "" },
+            { brand: "Gillig", description: "Dimmer Switch (under cluster)", partNumber: "79816", notes: "" },
+            { brand: "Gillig", description: "Wiper Motor", partNumber: "78398", notes: "" },
+            { brand: "Gillig", description: "Voltage Regulator", partNumber: "80725", notes: "" },
+            { brand: "Gillig", description: "Horn Assembly", partNumber: "74186", notes: "" },
+            { brand: "Gillig", description: "Destination Key Pad", partNumber: "77119", notes: "" },
+            { brand: "Gillig", description: "Drivers Light", partNumber: "80243", notes: "" },
+            { brand: "Gillig", description: "Street Side Mirror", partNumber: "80401", notes: "" },
+            { brand: "Gillig", description: "Curbside Mirror", partNumber: "80398", notes: "" },
+            { brand: "Gillig", description: "Curbside Mirror Assembly", partNumber: "80398", notes: "Assembly" },
+            { brand: "Gillig", description: "Low Beam", partNumber: "78633", notes: "" },
+            { brand: "Gillig", description: "High Beam", partNumber: "78632", notes: "" },
+            { brand: "Gillig", description: "Fire Suppression Bell", partNumber: "80482", notes: "" },
+            { brand: "Gillig", description: "RR Shock", partNumber: "79772", notes: "" },
+            { brand: "Gillig", description: "Front Coolant Sensor", partNumber: "25749", notes: "" },
+            { brand: "Gillig", description: "Fuel Focus", partNumber: "33532", notes: "" },
+            { brand: "Gillig", description: "Power Steering Pump Filter", partNumber: "79605", notes: "" },
+            { brand: "Gillig", description: "Air Compressor (One Cylinder)", partNumber: "44435", notes: "" },
+            { brand: "Gillig", description: "Air Compressor (Two Cylinder)", partNumber: "80892", notes: "" },
+            { brand: "Gillig", description: "Air Compressor Gasket", partNumber: "5440813", notes: "" },
+            { brand: "Gillig", description: "Starter Button", partNumber: "79824", notes: "" },
+            { brand: "Gillig", description: "Fuel Rail Pressure Sensor", partNumber: "80983", notes: "" },
+            { brand: "Gillig", description: "Coolant Level Sensor", partNumber: "79523", notes: "" },
+            { brand: "Gillig", description: "Rear Exit Door Glass", partNumber: "79736", notes: "" },
+            { brand: "Gillig", description: "NOx Sensor", partNumber: "80862", notes: "" },
+            { brand: "Gillig", description: "ITT", partNumber: "80967", notes: "" },
+            { brand: "Gillig", description: "VGT Actuator", partNumber: "80863", notes: "" },
+            { brand: "Gillig", description: "Wireless Stop Request", partNumber: "79144", notes: "" },
+            { brand: "Gillig", description: "Diesel Doser Valve", partNumber: "80865", notes: "" },
+            { brand: "Gillig", description: "Doser Valve Gasket", partNumber: "80864", notes: "" },
+            { brand: "Gillig", description: "Fuel Shutoff Valve", partNumber: "30610", notes: "" },
+            { brand: "Gillig", description: "Cat Exhaust", partNumber: "81010", notes: "" },
+            { brand: "Gillig", description: "Particulate Filter", partNumber: "02-75689-000", notes: "" },
+            { brand: "Gillig", description: "Turn Signal (Right)", partNumber: "79814", notes: "" },
+            { brand: "Gillig", description: "Turn Signal (Left)", partNumber: "79815", notes: "" },
+            { brand: "Gillig", description: "Wiper Assembly", partNumber: "78394", notes: "" },
+            { brand: "Gillig", description: "Diesel NOx #1 Sensor w/ Module", partNumber: "80862", notes: "Duplicate of NOx Sensor" },
+            { brand: "Gillig", description: "Main Fuel Valve Solenoid", partNumber: "81134", notes: "Bus #7037" },
+            { brand: "Gillig", description: "Door Switch (Open/Close)", partNumber: "80612", notes: "" },
+            { brand: "Gillig", description: "Horn Switch", partNumber: "80930", notes: "7000 Busses" },
+            { brand: "Gillig", description: "Lug Nuts", partNumber: "80821", notes: "" },
+            { brand: "Gillig", description: "Water Pump Pulley", partNumber: "74521-504", notes: "" },
+
+            // --- NEW FLYER ---
+            { brand: "New Flyer", description: "X'Brace Rod (Left)", partNumber: "635921", notes: "" },
+            { brand: "New Flyer", description: "X'Brace Rod (Right)", partNumber: "6358", notes: "" },
+            { brand: "New Flyer", description: "Street Side Wiper Motor", partNumber: "70902", notes: "" },
+            { brand: "New Flyer", description: "90 Degree Thermostat Hose", partNumber: "75703", notes: "" },
+            { brand: "New Flyer", description: "Coolant Cap", partNumber: "74749", notes: "" },
+            { brand: "New Flyer", description: "Consep", partNumber: "41881", notes: "" },
+            { brand: "New Flyer", description: "Horn Button Assembly", partNumber: "43355 / 73213", notes: "End: 1242355" },
+            { brand: "New Flyer", description: "Steering Wheel", partNumber: "75337", notes: "" },
+            { brand: "New Flyer", description: "Back Up Alarm", partNumber: "42528", notes: "" },
+            { brand: "New Flyer", description: "Thermostat", partNumber: "75312", notes: "" },
+            { brand: "New Flyer", description: "Brake Application Valve", partNumber: "73032", notes: "" },
+            { brand: "New Flyer", description: "Coolant Level Sensor", partNumber: "78010", notes: "" },
+            { brand: "New Flyer", description: "ECM", partNumber: "40002", notes: "" },
+            { brand: "New Flyer", description: "Surge Tank", partNumber: "75113", notes: "" },
+            { brand: "New Flyer", description: "Water Pump", partNumber: "34483", notes: "" },
+            { brand: "New Flyer", description: "Water Pump Belt", partNumber: "34322", notes: "" },
+            { brand: "New Flyer", description: "Voltage Regulator", partNumber: "74257", notes: "" },
+            { brand: "New Flyer", description: "Front Rods", partNumber: "70110", notes: "Bolts: 74651" },
+            { brand: "New Flyer", description: "Center Link", partNumber: "71615", notes: "" },
+            { brand: "New Flyer", description: "Rear Main Seal", partNumber: "30164", notes: "" },
+            { brand: "New Flyer", description: "Brake Accelerator Pedal Assembly", partNumber: "72692", notes: "" },
+            { brand: "New Flyer", description: "Bell Cord Chime Speaker", partNumber: "438921", notes: "" },
+            { brand: "New Flyer", description: "Rear Destination Sign", partNumber: "72951", notes: "" },
+            { brand: "New Flyer", description: "Crank Case without Sensor", partNumber: "72866", notes: "" },
+            { brand: "New Flyer", description: "Stop Request Switch (on pole)", partNumber: "648492", notes: "" },
+            { brand: "New Flyer", description: "SR7 Quick Release Valve", partNumber: "43997", notes: "" },
+            { brand: "New Flyer", description: "Starter Solenoid", partNumber: "43985", notes: "" },
+            { brand: "New Flyer", description: "Drag Link", partNumber: "70824", notes: "" },
+            { brand: "New Flyer", description: "Knock Sensor", partNumber: "33436", notes: "by cylinder 6" },
+            { brand: "New Flyer", description: "EGR Housing", partNumber: "40215", notes: "" },
+            { brand: "New Flyer", description: "Tensioner", partNumber: "44420", notes: "" },
+            { brand: "New Flyer", description: "Speed Sensor", partNumber: "25876", notes: "" },
+            { brand: "New Flyer", description: "Oil Filter", partNumber: "48105", notes: "" },
+            { brand: "New Flyer", description: "Transmission", partNumber: "49802", notes: "" },
+            { brand: "New Flyer", description: "Transcooler", partNumber: "73006", notes: "" },
+            { brand: "New Flyer", description: "Waste Gate Control Valve", partNumber: "28836", notes: "" },
+            { brand: "New Flyer", description: "EGR Temp Sensor", partNumber: "75310", notes: "" },
+            { brand: "New Flyer", description: "Turbo Gasket", partNumber: "70860", notes: "" },
+            { brand: "New Flyer", description: "Driver Side Mirror", partNumber: "72899", notes: "" },
+            { brand: "New Flyer", description: "Passenger Side Mirror", partNumber: "72898", notes: "" },
+            { brand: "New Flyer", description: "Rear Engine Speed Throttle Controller", partNumber: "40044", notes: "" },
+            { brand: "New Flyer", description: "EMP Fan", partNumber: "72797", notes: "" },
+            { brand: "New Flyer", description: "Parking Brake Assembly", partNumber: "72922", notes: "" },
+            { brand: "New Flyer", description: "Air Concept Rebuild Kit", partNumber: "45574", notes: "" },
+            { brand: "New Flyer", description: "Headlight (2500 series)", partNumber: "44075", notes: "" },
+            { brand: "New Flyer", description: "Street Side Mirror", partNumber: "72899", notes: "" },
+            { brand: "New Flyer", description: "Shock Absorber", partNumber: "72975", notes: "" },
+            { brand: "New Flyer", description: "SR7 Spring Brake Valve", partNumber: "74625", notes: "" },
+            { brand: "New Flyer", description: "Coolant Temp Sensor", partNumber: "72969", notes: "" },
+            { brand: "New Flyer", description: "Coolant Leveling Sensor", partNumber: "78010", notes: "" },
+            { brand: "New Flyer", description: "Gas Filler Nozzle", partNumber: "23381", notes: "" },
+            { brand: "New Flyer", description: "Exhaust Elbow Gasket", partNumber: "80940", notes: "" },
+            { brand: "New Flyer", description: "X Brace / X Bar", partNumber: "80923", notes: "" },
+            { brand: "New Flyer", description: "Surge Tank Cap", partNumber: "72929", notes: "" },
+            { brand: "New Flyer", description: "Turbo Sensor", partNumber: "78013", notes: "" },
+            { brand: "New Flyer", description: "Auto Drain Assembly", partNumber: "509288", notes: "" },
+            { brand: "New Flyer", description: "Spark Plugs", partNumber: "78012", notes: "" },
+            { brand: "New Flyer", description: "Coils", partNumber: "34337", notes: "" },
+            { brand: "New Flyer", description: "ICM", partNumber: "34411", notes: "" },
+            { brand: "New Flyer", description: "ICM Harness", partNumber: "40040", notes: "" },
+            { brand: "New Flyer", description: "Transmission Filters", partNumber: "23821", notes: "" },
+            { brand: "New Flyer", description: "Upper Rods (Rear)", partNumber: "74280", notes: "" },
+            { brand: "New Flyer", description: "Lower Rods", partNumber: "74279", notes: "" },
+            { brand: "New Flyer", description: "EGR Cooler", partNumber: "4127", notes: "" },
+            { brand: "New Flyer", description: "EGR Cooler Kit", partNumber: "40076", notes: "" },
+            { brand: "New Flyer", description: "Windshield Curbside (1400)", partNumber: "70354", notes: "" },
+            { brand: "New Flyer", description: "Front Consep (Auto Drain Assembly)", partNumber: "72663", notes: "" },
+            { brand: "New Flyer", description: "Operators Seat Assembly", partNumber: "74688", notes: "" },
+            { brand: "New Flyer", description: "Parking Brake Control Valve", partNumber: "43995", notes: "" },
+            { brand: "New Flyer", description: "Transmission Filter Kit", partNumber: "23821", notes: "" },
+            { brand: "New Flyer", description: "Bike Rack Mount", partNumber: "49744", notes: "" },
+            { brand: "New Flyer", description: "Complete Front Bumper", partNumber: "70813", notes: "" },
+            { brand: "New Flyer", description: "L/R Leveling Valve", partNumber: "76346", notes: "" },
+            { brand: "New Flyer", description: "Fan (Radiator)", partNumber: "72797", notes: "" },
+            { brand: "New Flyer", description: "Exhaust Bellow (Elbow)", partNumber: "73069", notes: "" },
+            { brand: "New Flyer", description: "Compressor (Air)", partNumber: "48166", notes: "" },
+            { brand: "New Flyer", description: "Compressor to Engine Quick Disconnect", partNumber: "40271", notes: "" },
+            { brand: "New Flyer", description: "Fuel Inlet Pressure Sensor", partNumber: "80975", notes: "" },
+            { brand: "New Flyer", description: "Brake Wear Indicator", partNumber: "75545", notes: "" },
+            { brand: "New Flyer", description: "Front Main Seal", partNumber: "33925", notes: "" },
+            { brand: "New Flyer", description: "Elbow Hose", partNumber: "40469", notes: "" },
+            { brand: "New Flyer", description: "Foot Pedal Sensor", partNumber: "74536", notes: "" },
+            { brand: "New Flyer", description: "Brake Sensor", partNumber: "75545", notes: "Duplicate of Wear Indicator" },
+            { brand: "New Flyer", description: "Rear Door Motor", partNumber: "42213", notes: "" },
+            { brand: "New Flyer", description: "Coolant Temp Sensor (On Block)", partNumber: "8075...", notes: "Number cutoff" },
+            { brand: "New Flyer", description: "SR7 Air Valve", partNumber: "74625", notes: "" },
+            { brand: "New Flyer", description: "Front Destination Motherboard", partNumber: "76088", notes: "" },
+            { brand: "New Flyer", description: "Airbag", partNumber: "74404 / 80699", notes: "" },
+            { brand: "New Flyer", description: "Compressor Belt", partNumber: "51200", notes: "" },
+            { brand: "New Flyer", description: "Turn Signal Foot Switch", partNumber: "5925959", notes: "" },
+            { brand: "New Flyer", description: "Shock Absorber Assembly", partNumber: "72975", notes: "" },
+            { brand: "New Flyer", description: "Transmission Bolts", partNumber: "44640", notes: "" },
+            { brand: "New Flyer", description: "Battery (2 Long)", partNumber: "78318", notes: "" },
+            { brand: "New Flyer", description: "Turbo", partNumber: "34482-01", notes: "" },
+            { brand: "New Flyer", description: "Alternator", partNumber: "48173", notes: "" },
+            { brand: "New Flyer", description: "Damper Arm", partNumber: "73446", notes: "" },
+            { brand: "New Flyer", description: "Oil Drain Plug", partNumber: "80867", notes: "" },
+            { brand: "New Flyer", description: "Engine Mount (Front)", partNumber: "499546", notes: "" },
+            { brand: "New Flyer", description: "Engine Mount (Rear)", partNumber: "492756", notes: "" },
+            { brand: "New Flyer", description: "ITT Regulator", partNumber: "49518", notes: "" },
+            { brand: "New Flyer", description: "Alternator Belt", partNumber: "44438", notes: "" },
+            { brand: "New Flyer", description: "Leveling Valve Rod (Rear)", partNumber: "47394", notes: "" },
+            { brand: "New Flyer", description: "Wiper Assembly", partNumber: "41648", notes: "Blade: 10290" },
+            { brand: "New Flyer", description: "Air Dryer Assembly", partNumber: "446191 / 72656", notes: "" },
+            { brand: "New Flyer", description: "Intake Pressure & Temp Sensor", partNumber: "75272", notes: "1500 Busses" },
+            { brand: "New Flyer", description: "Curbside Mirror & Bracket", partNumber: "71346 / 72898", notes: "1500 Bus" },
+            { brand: "New Flyer", description: "Curbside Windshield", partNumber: "75040", notes: "1500 Bus" },
+            { brand: "New Flyer", description: "Tensioner Belt", partNumber: "74521", notes: "" },
+            { brand: "New Flyer", description: "Drag Link (1600 Series)", partNumber: "70824", notes: "" },
+            { brand: "New Flyer", description: "Seat Belt", partNumber: "30555", notes: "" },
+            { brand: "New Flyer", description: "Humidity Sensor Switch", partNumber: "74325", notes: "" },
+            { brand: "New Flyer", description: "Destination Sign Windshield", partNumber: "74652", notes: "" },
+            { brand: "New Flyer", description: "Driver Side Front Door Air Switch", partNumber: "281977", notes: "" },
+            { brand: "New Flyer", description: "Water Pump Pulley", partNumber: "32989-505", notes: "" },
+            { brand: "New Flyer", description: "Cluster (1401-1480)", partNumber: "507992", notes: "" },
+            { brand: "New Flyer", description: "Long Rear Stud", partNumber: "40201", notes: "" },
+
+            // --- UNIVERSAL / MISC ---
+            { brand: "Universal", description: "Air Union", partNumber: "596 / 285", notes: "3/8 Air Line" },
+            { brand: "Universal", description: "Diesel Fuel Filler Neck", partNumber: "47976", notes: "" },
+            { brand: "Universal", description: "CNG Fuel Filter", partNumber: "28685", notes: "" },
+            { brand: "Universal", description: "100 Amp Fuse", partNumber: "40342", notes: "" },
+            { brand: "Universal", description: "Rear Engine Door Gas Shock", partNumber: "78203", notes: "" },
+            { brand: "Toolbox", description: "Wheels (Swivel)", partNumber: "15977", notes: "" },
+            { brand: "Toolbox", description: "Wheels (Rigid)", partNumber: "15976", notes: "" },
+            { brand: "Coolant", description: "3 1/2 inch Hump Hose", partNumber: "80272", notes: "" },
+            { brand: "Universal", description: "Small Zip Ties", partNumber: "15481", notes: "" },
+            { brand: "Universal", description: "Battery (2500 series)", partNumber: "33444", notes: "Set of 4" },
+            { brand: "Universal", description: "Battery (Black Long)", partNumber: "24194", notes: "Set of 2" },
+            { brand: "Universal", description: "One Way Check Valve", partNumber: "43945", notes: "" },
+            { brand: "Universal", description: "90 Degree Hose", partNumber: "40469", notes: "" },
+            { brand: "Universal", description: "Spray Degreaser", partNumber: "30621", notes: "" },
+            { brand: "Universal", description: "Bus Key", partNumber: "78758", notes: "Phone: 352-436-7732" },
+            { brand: "Universal", description: "De-Pinner", partNumber: "17498", notes: "" },
+            { brand: "Universal", description: "Black Sealant Window", partNumber: "49210", notes: "" },
+            { brand: "Universal", description: "Gasket Maker Grey", partNumber: "3696", notes: "" },
+            { brand: "Universal", description: "16 LB Radiator Cap", partNumber: "72929", notes: "" },
+            { brand: "Universal", description: "1/2 inch Brake Air Hose Line", partNumber: "30176", notes: "" },
+            { brand: "Universal", description: "Small Door / Gas Door Rod", partNumber: "70683", notes: "" },
+            { brand: "Universal", description: "Oil Cooler", partNumber: "30563", notes: "" },
+            { brand: "Universal", description: "Oil Cooler Gasket", partNumber: "34172", notes: "" },
+            { brand: "Universal", description: "Oil Dipstick", partNumber: "30147", notes: "" },
+            { brand: "Universal", description: "Plastic Coolant Line", partNumber: "30533", notes: "Front of Motor" },
+            { brand: "Universal", description: "Crank / Cam Sensor", partNumber: "74980", notes: "" },
+            { brand: "Universal", description: "Wheelchair Stop Request Button", partNumber: "48704", notes: "" },
+            { brand: "Universal", description: "O2 Sensor", partNumber: "49659", notes: "" },
+            { brand: "Universal", description: "Radiator", partNumber: "72938", notes: "" },
+            { brand: "Universal", description: "Radiator (Alternate)", partNumber: "80767", notes: "" },
+            { brand: "Universal", description: "Driver Seat", partNumber: "74688", notes: "" },
+            { brand: "Universal", description: "R-14 Valve", partNumber: "74622", notes: "" },
+            { brand: "Universal", description: "Short EGR Coolant Hose", partNumber: "75297", notes: "45° / 90°" },
+            { brand: "Universal", description: "Exhaust Temp Sensor", partNumber: "49661", notes: "" },
+            { brand: "Universal", description: "Door Controller", partNumber: "80722", notes: "" },
+            { brand: "Universal", description: "Air Gun Fitting", partNumber: "495", notes: "" },
+            { brand: "Universal", description: "23 Inch Light Strip", partNumber: "73087", notes: "" },
+            { brand: "Universal", description: "Bike Rack Frame/Mount", partNumber: "72925", notes: "2500 Busses" },
+            { brand: "Universal", description: "2.5\" 90 Degree Lower Radiator Hose", partNumber: "47036", notes: "" },
+            { brand: "Universal", description: "Seat Pad for Seat Alarm", partNumber: "72612", notes: "" },
+            { brand: "Universal", description: "Windshield Sealant", partNumber: "40227", notes: "Adhesive" },
+            { brand: "Universal", description: "Proximity Switch", partNumber: "47784", notes: "" },
+            { brand: "Universal", description: "Fuel Outlet Pressure/Temp Sensor", partNumber: "33678", notes: "" },
+            { brand: "Universal", description: "Fuel Inlet Sensor", partNumber: "80975", notes: "" },
+            { brand: "Universal", description: "Dual Sensor", partNumber: "75272", notes: "" },
+            { brand: "Sticky Note", description: "Unknown", partNumber: "635921 / 635619", notes: "" }
+          ];
+
+          // Logic to deduplicate based on partNumber
+          const inventoryData = useMemo(() => {
+            const uniqueMap = new Map();
+            
+            rawInventoryData.forEach(item => {
+              // Normalize part number (remove spaces for comparison)
+              const key = item.partNumber.trim();
+              
+              if (!uniqueMap.has(key)) {
+                uniqueMap.set(key, item);
+              } else {
+                const existing = uniqueMap.get(key);
+                if (item.notes && !existing.notes) {
+                  existing.notes = item.notes;
+                }
+                if (item.description.length > existing.description.length) {
+                  existing.description = item.description;
+                }
+              }
+            });
+            
+            return Array.from(uniqueMap.values());
+          }, []);
+
+          const handleSort = (key) => {
+            let direction = 'ascending';
+            if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+              direction = 'descending';
+            }
+            setSortConfig({ key, direction });
+          };
+
+          const sortedData = useMemo(() => {
+            let sortableItems = [...inventoryData];
+            if (sortConfig.key !== null) {
+              sortableItems.sort((a, b) => {
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                  return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                  return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+              });
+            }
+            return sortableItems;
+          }, [inventoryData, sortConfig]);
+
+          const filteredData = sortedData.filter(item =>
+            item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.partNumber.includes(searchTerm)
+          );
+
+          return (
+            <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans">
+              <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+                {/* Header */}
+                <div className="bg-slate-800 p-6 text-white flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                      <PackageIcon className="w-8 h-8 text-blue-400" />
+                      Bus Parts Inventory
+                    </h1>
+                    <p className="text-slate-400 mt-1">Digital catalog with {inventoryData.length} unique parts</p>
+                  </div>
+                  <div className="relative w-full md:w-96">
+                    <input
+                      type="text"
+                      placeholder="Search by part, brand, or number..."
+                      className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className="absolute left-3 top-2.5 text-slate-400">
+                        <SearchIcon className="w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="bg-slate-100 p-4 border-b flex justify-between items-center text-sm text-slate-600">
+                  <div className="flex gap-6">
+                     <div className="font-semibold">Unique Parts: <span className="text-blue-600">{inventoryData.length}</span></div>
+                     <div className="font-semibold">Showing: <span className="text-blue-600">{filteredData.length}</span></div>
+                  </div>
+                  {rawInventoryData.length > inventoryData.length && (
+                    <div className="flex items-center gap-1 text-amber-600">
+                       <span className="flex items-center gap-1"><AlertCircleIcon className="w-4 h-4" /> {rawInventoryData.length - inventoryData.length} duplicates hidden</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Grid/Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-700 text-sm uppercase tracking-wider border-b">
+                        <th 
+                          className="p-4 cursor-pointer hover:bg-slate-100 transition-colors"
+                          onClick={() => handleSort('brand')}
+                        >
+                          <div className="flex items-center gap-2">
+                            <WrenchIcon className="w-4 h-4" />
+                            Brand
+                            {sortConfig.key === 'brand' && (
+                              <span className="text-xs text-blue-500">{sortConfig.direction === 'ascending' ? '▲' : '▼'}</span>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="p-4 cursor-pointer hover:bg-slate-100 transition-colors"
+                          onClick={() => handleSort('description')}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileTextIcon className="w-4 h-4" />
+                            Description
+                            {sortConfig.key === 'description' && (
+                              <span className="text-xs text-blue-500">{sortConfig.direction === 'ascending' ? '▲' : '▼'}</span>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="p-4 cursor-pointer hover:bg-slate-100 transition-colors"
+                          onClick={() => handleSort('partNumber')}
+                        >
+                          <div className="flex items-center gap-2">
+                            <HashIcon className="w-4 h-4" />
+                            Part Number
+                            {sortConfig.key === 'partNumber' && (
+                              <span className="text-xs text-blue-500">{sortConfig.direction === 'ascending' ? '▲' : '▼'}</span>
+                            )}
+                          </div>
+                        </th>
+                        <th className="p-4">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredData.length > 0 ? (
+                        filteredData.map((item, index) => (
+                          <tr 
+                            key={index} 
+                            className="hover:bg-blue-50 transition-colors group"
+                          >
+                            <td className="p-4 font-medium text-slate-700">
+                              <span className={`inline-block px-2 py-1 rounded-full text-xs ${
+                                item.brand === 'Gillig' ? 'bg-red-100 text-red-700' :
+                                item.brand === 'New Flyer' ? 'bg-blue-100 text-blue-700' :
+                                'bg-gray-200 text-gray-700'
+                              }`}>
+                                {item.brand}
+                              </span>
+                            </td>
+                            <td className="p-4 text-slate-800 font-semibold">{item.description}</td>
+                            <td className="p-4 font-mono text-blue-600 bg-slate-50 group-hover:bg-white rounded px-2">{item.partNumber}</td>
+                            <td className="p-4 text-slate-500 text-sm italic">{item.notes}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="p-8 text-center text-slate-500">
+                            No parts found matching "{searchTerm}"
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<InventoryGrid />);
+    </script>
+</body>
+</html>
