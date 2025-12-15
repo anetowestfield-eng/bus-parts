@@ -1,23 +1,24 @@
 /* --- DEFAULTS --- */
 :root {
-    --bg-app: #f0f2f5;
+    --bg-app: #f2f4f6;       
     --bg-panel: #ffffff;     
-    --text-primary: #1a1a1a; 
-    --text-secondary: #65676b; 
-    --border-color: #e4e6eb; 
+    --text-primary: #111827; 
+    --text-secondary: #6b7280; 
+    --border-color: #e5e7eb; 
     --accent-color: #2563eb; 
-    --highlight-bg: #f8f9fa; 
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --highlight-bg: #f9fafb; 
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --glass-bg: rgba(255, 255, 255, 0.85); /* For Header */
 }
 
 body.dark-mode {
-    --bg-app: #18191a;
-    --bg-panel: #242526;
-    --text-primary: #e4e6eb;
-    --text-secondary: #b0b3b8;
-    --border-color: #3e4042;
-    --highlight-bg: #3a3b3c;
+    --bg-app: #111827;
+    --bg-panel: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: #374151;
+    --highlight-bg: #374151;
+    --glass-bg: rgba(31, 41, 55, 0.85);
 }
 
 html { font-size: 16px; transition: font-size 0.2s ease; }
@@ -26,7 +27,7 @@ html.zoom-large { font-size: 22px; }
 
 body {
     margin: 0; padding: 20px;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-app); color: var(--text-primary);
 }
 
@@ -38,10 +39,15 @@ body {
 
 html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 98%; }
 
-/* --- HEADER --- */
+/* --- GLASS HEADER --- */
 .top-header {
     position: sticky; top: 0; z-index: 500;
-    background-color: var(--bg-panel);
+    
+    /* Modern Glass Effect */
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
     margin-top: -30px; padding-top: 30px;
@@ -61,7 +67,7 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
 }
 .search-box:focus-within {
     background: var(--bg-panel); border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 .search-box input {
     border: none; background: transparent; outline: none;
@@ -79,13 +85,14 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
 .controls-row { margin-bottom: 20px; }
 .filter-section { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
 .filter-pill {
-    background: var(--bg-app); border: none; color: var(--text-secondary);
+    background: var(--bg-app); border: 1px solid transparent; color: var(--text-secondary);
     padding: 8px 18px; border-radius: 50px; cursor: pointer;
     font-weight: 600; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap;
 }
 .filter-pill:hover { background: var(--border-color); }
 .filter-pill.active {
     background: var(--text-primary); color: var(--bg-panel);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* Table */
@@ -101,28 +108,27 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
     padding: 16px 15px; border-bottom: 1px solid var(--border-color);
     vertical-align: middle; font-size: 0.95rem;
 }
-.parts-table tr { transition: all 0.1s ease-in-out; }
-.parts-table tr:hover {
-    background-color: var(--highlight-bg);
-    transform: scale(1.002);
-}
+.parts-table tr { transition: background-color 0.1s; }
+.parts-table tr:hover { background-color: var(--highlight-bg); }
 
 /* Columns */
 .col-img { width: 50px; text-align: center; }
 .img-link { color: var(--text-secondary); font-size: 1.2rem; transition: color 0.2s; }
 .img-link:hover { color: var(--accent-color); }
 
+/* Part Number Button - Tactile Feel */
 .part-btn {
     font-family: 'Courier New', monospace; font-weight: 700; font-size: 1rem;
     color: var(--accent-color); background-color: rgba(37, 99, 235, 0.08); 
-    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer;
     display: inline-block; border: 1px solid transparent; transition: all 0.2s;
     white-space: nowrap;
 }
 .part-btn:hover {
     background-color: var(--accent-color); color: white;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25); transform: translateY(-1px);
 }
+.part-btn:active { transform: translateY(0); box-shadow: none; }
 
 /* Badges */
 .badge-cat {
@@ -136,9 +142,7 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
 body.dark-mode .badge-cat.misc { background: #374151; color: #d1d5db; }
 
 /* Empty State */
-.empty-state {
-    text-align: center; padding: 60px 20px; color: var(--text-secondary);
-}
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
 .empty-state i { font-size: 3rem; margin-bottom: 15px; opacity: 0.5; }
 .empty-state h3 { margin: 0; color: var(--text-primary); }
 
@@ -148,9 +152,9 @@ body.dark-mode .badge-cat.misc { background: #374151; color: #d1d5db; }
     background: var(--bg-panel); border: 1px solid var(--border-color);
     color: var(--text-primary); padding: 12px 30px; border-radius: 50px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
 }
-.load-more-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.load-more-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
 
 /* Toast */
 #copyToast {
@@ -169,11 +173,25 @@ body.dark-mode .badge-cat.misc { background: #374151; color: #d1d5db; }
     .header-right { width: 100%; }
     .search-box { width: 100%; }
     .parts-table thead { display: none; }
+    
     .parts-table tr, .parts-table td { display: block; width: 100%; }
+    
+    /* MOBILE CARD STYLE */
     .parts-table tr { 
-        margin-bottom: 15px; border: 1px solid var(--border-color);
+        margin-bottom: 15px; background: var(--bg-panel);
+        border: 1px solid var(--border-color);
         border-radius: 12px; padding: 15px;
+        box-shadow: var(--shadow-md);
+        
+        /* Color Coded Borders Left (Default) */
+        border-left: 5px solid var(--border-color);
     }
+
+    /* Color Code the Mobile Cards */
+    .parts-table tr[data-category="New Flyer"] { border-left-color: #0ea5e9; }
+    .parts-table tr[data-category="Gillig"] { border-left-color: #22c55e; }
+    .parts-table tr[data-category="Universal"] { border-left-color: #a855f7; }
+    
     .parts-table td {
         display: flex; justify-content: space-between; text-align: right; padding: 8px 0;
     }

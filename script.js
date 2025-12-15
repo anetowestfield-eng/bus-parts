@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
             allParts = data;
-            // Simple Counter Update
             document.getElementById('total-count').innerText = allParts.length.toLocaleString();
             applyFiltersAndSort();
         });
@@ -56,7 +55,6 @@ function renderTable() {
     const emptyState = document.getElementById('noResults');
     const tableEl = document.querySelector('.parts-table');
     
-    // Empty State Logic
     if (filteredParts.length === 0) {
         tableEl.style.display = 'none';
         emptyState.style.display = 'block';
@@ -75,8 +73,9 @@ function renderTable() {
     dataToShow.forEach(p => {
         const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p.description + ' ' + p.partNumber)}`;
         
+        // ADDED data-category attribute here for CSS styling
         const row = `
-            <tr>
+            <tr data-category="${p.category}">
                 <td class="col-img" data-label="Image">
                     <a href="${googleUrl}" target="_blank" class="img-link" title="Search Image on Google">
                         <i class="fa-solid fa-image"></i>
