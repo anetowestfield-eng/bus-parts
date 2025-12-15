@@ -1,6 +1,6 @@
 /* --- DEFAULTS --- */
 :root {
-    --bg-app: #f0f2f5;       /* Slightly darker gray for better contrast */
+    --bg-app: #f0f2f5;
     --bg-panel: #ffffff;     
     --text-primary: #1a1a1a; 
     --text-secondary: #65676b; 
@@ -20,14 +20,13 @@ body.dark-mode {
     --highlight-bg: #3a3b3c;
 }
 
-/* Base Settings */
 html { font-size: 16px; transition: font-size 0.2s ease; }
 html.zoom-medium { font-size: 19px; } 
 html.zoom-large { font-size: 22px; }
 
 body {
     margin: 0; padding: 20px;
-    font-family: 'Inter', system-ui, sans-serif; /* Modern Font */
+    font-family: 'Inter', system-ui, sans-serif;
     background-color: var(--bg-app); color: var(--text-primary);
 }
 
@@ -45,7 +44,7 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
     background-color: var(--bg-panel);
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
-    margin-top: -30px; padding-top: 30px; /* Sticky Fix */
+    margin-top: -30px; padding-top: 30px;
     flex-wrap: wrap; gap: 15px;
 }
 
@@ -76,23 +75,6 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
 }
 .icon-btn:hover { background: var(--border-color); color: var(--text-primary); transform: scale(1.05); }
 
-/* --- NEW STATS GRID --- */
-.stats-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px; margin-bottom: 30px;
-}
-.stat-card {
-    background: var(--bg-app); padding: 15px; border-radius: 12px;
-    text-align: center; border: 1px solid var(--border-color);
-}
-.stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); }
-.stat-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
-
-/* Stat Colors */
-.stat-card.blue .stat-value { color: #2563eb; }
-.stat-card.green .stat-value { color: #16a34a; }
-.stat-card.purple .stat-value { color: #9333ea; }
-
 /* Filters */
 .controls-row { margin-bottom: 20px; }
 .filter-section { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
@@ -103,7 +85,7 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
 }
 .filter-pill:hover { background: var(--border-color); }
 .filter-pill.active {
-    background: var(--text-primary); color: var(--bg-panel); /* High Contrast Active */
+    background: var(--text-primary); color: var(--bg-panel);
 }
 
 /* Table */
@@ -122,7 +104,7 @@ html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 9
 .parts-table tr { transition: all 0.1s ease-in-out; }
 .parts-table tr:hover {
     background-color: var(--highlight-bg);
-    transform: scale(1.002); /* Subtle lift */
+    transform: scale(1.002);
 }
 
 /* Columns */
@@ -184,7 +166,7 @@ body.dark-mode .badge-cat.misc { background: #374151; color: #d1d5db; }
 @media screen and (max-width: 768px) {
     .main-container { padding: 15px; border-radius: 0; }
     .top-header { margin-top: -15px; padding: 15px; }
-    .header-right, .stats-grid { width: 100%; }
+    .header-right { width: 100%; }
     .search-box { width: 100%; }
     .parts-table thead { display: none; }
     .parts-table tr, .parts-table td { display: block; width: 100%; }

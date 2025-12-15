@@ -17,26 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
             allParts = data;
-            updateStats(allParts); // Calculate Stats on Load
+            // Simple Counter Update
+            document.getElementById('total-count').innerText = allParts.length.toLocaleString();
             applyFiltersAndSort();
         });
 
     setupEventListeners();
 });
-
-// --- NEW: STATS CALCULATOR ---
-function updateStats(data) {
-    const total = data.length;
-    const nf = data.filter(p => p.category === 'New Flyer').length;
-    const gillig = data.filter(p => p.category === 'Gillig').length;
-    const uni = data.filter(p => p.category === 'Universal').length;
-
-    // Animate the numbers (simple text update)
-    document.getElementById('stat-total').innerText = total.toLocaleString();
-    document.getElementById('stat-nf').innerText = nf.toLocaleString();
-    document.getElementById('stat-gillig').innerText = gillig.toLocaleString();
-    document.getElementById('stat-uni').innerText = uni.toLocaleString();
-}
 
 function applyFiltersAndSort() {
     const search = document.getElementById('searchInput').value.toLowerCase();
