@@ -39,13 +39,27 @@ body {
 /* Zoom Container Width Fix */
 html.zoom-medium .main-container, html.zoom-large .main-container { max-width: 98%; }
 
-/* Header */
+/* --- STICKY HEADER --- */
 .top-header {
+    /* Sticky Magic */
+    position: sticky; 
+    top: 0; 
+    z-index: 500; /* Stays on top of everything */
+    background-color: var(--bg-panel); /* Solid background so text doesn't overlap */
+    
+    /* Layout */
     display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
-    flex-wrap: wrap; /* Allow wrapping on small screens */
+    margin-bottom: 25px; 
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap; 
     gap: 15px;
+
+    /* Fix to make it cover the top padding of the container */
+    margin-top: -25px; 
+    padding-top: 25px; 
+    padding-bottom: 20px;
 }
+
 .header-left h1 { margin: 0; font-size: 1.6rem; display: flex; align-items: center; }
 .logo-icon { color: var(--accent-color); margin-right: 10px; }
 
@@ -180,12 +194,28 @@ body.dark-mode .part-btn { background-color: rgba(13, 110, 253, 0.2); }
 /* MOBILE RESPONSIVENESS (Max Width 768px)   */
 /* ========================================= */
 @media screen and (max-width: 768px) {
-    body { padding: 10px; }
+    body { padding: 0; }
     
-    .main-container { padding: 15px; }
+    .main-container { 
+        padding: 15px; 
+        border-radius: 0; /* Full screen feel */
+        box-shadow: none;
+    }
 
     /* Stack Header elements */
-    .top-header { flex-direction: column; align-items: stretch; gap: 15px; }
+    .top-header { 
+        flex-direction: column; 
+        align-items: stretch; 
+        gap: 15px; 
+        
+        /* Ensure it sticks to the very top on mobile */
+        margin-top: -15px; 
+        margin-left: -15px; 
+        margin-right: -15px; 
+        padding: 15px 15px 20px 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Add subtle shadow when sticky */
+    }
+
     .header-right { justify-content: space-between; width: 100%; }
     .search-box { width: 100%; flex-grow: 1; }
 
@@ -198,7 +228,7 @@ body.dark-mode .part-btn { background-color: rgba(13, 110, 253, 0.2); }
     }
 
     /* --- CARD VIEW FOR TABLE --- */
-    .parts-table thead { display: none; } /* Hide Table Header */
+    .parts-table thead { display: none; } 
 
     .parts-table, .parts-table tbody, .parts-table tr, .parts-table td {
         display: block; width: 100%;
@@ -213,55 +243,40 @@ body.dark-mode .part-btn { background-color: rgba(13, 110, 253, 0.2); }
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    /* Style Cells */
     .parts-table td {
         padding: 8px 0;
         border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        display: flex; justify-content: space-between; align-items: center;
         text-align: right;
     }
     
     .parts-table td:last-child { border-bottom: none; }
 
-    /* Add Labels using data-label attribute */
     .parts-table td::before {
         content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        margin-right: 15px;
-        text-align: left;
+        font-weight: 600; color: var(--text-secondary); font-size: 0.8rem;
+        text-transform: uppercase; margin-right: 15px; text-align: left;
     }
 
-    /* Hide Image Row to save space (Optional) */
     .col-img { display: none !important; }
 
-    /* Special Styling for Part Number in Mobile */
+    /* Part Number Mobile Style */
     .parts-table td[data-label="Part Number"] {
-        order: -1; /* Move to top */
+        order: -1; 
         border-bottom: 1px solid var(--border-color);
-        padding-bottom: 10px;
-        margin-bottom: 5px;
+        padding-bottom: 10px; margin-bottom: 5px;
         justify-content: center;
     }
-    .parts-table td[data-label="Part Number"]::before { display: none; } /* Hide label for main title */
+    .parts-table td[data-label="Part Number"]::before { display: none; } 
     
     .parts-table td[data-label="Short Desc"] {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        text-align: left;
-        display: block;
+        font-size: 1.1rem; font-weight: 700; color: var(--text-primary);
+        text-align: left; display: block;
     }
     .parts-table td[data-label="Short Desc"]::before { display: none; }
 
     .parts-table td[data-label="Full Desc"] {
-        display: block;
-        text-align: left;
-        margin-top: 5px;
+        display: block; text-align: left; margin-top: 5px;
     }
     .parts-table td[data-label="Full Desc"]::before { display: none; }
 }
