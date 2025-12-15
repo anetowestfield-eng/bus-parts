@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARTA Parts Database</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <header class="top-header">
+            <div class="header-left">
+                <h1><i class="fa-solid fa-bus logo-icon"></i> MARTA Parts Database</h1>
+                <p class="subtitle">Official Inventory :: <span id="total-count">0</span> Items</p>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search...">
+                </div>
+                <button id="btnZoom" class="icon-btn" title="Toggle Text Size">AA</button>
+                <button id="btnTheme" class="icon-btn" title="Toggle Dark Mode"><i class="fa-solid fa-sun"></i></button>
+            </div>
+        </header>
+
+        <div class="controls-row">
+            <div class="filter-section">
+                <button class="filter-pill active" data-cat="All">All Parts</button>
+                <button class="filter-pill" data-cat="New Flyer">New Flyer</button>
+                <button class="filter-pill" data-cat="Gillig">Gillig</button>
+                <button class="filter-pill" data-cat="Universal">Universal</button>
+                <button class="filter-pill" data-cat="Misc">Misc</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="parts-table">
+                <thead>
+                    <tr>
+                        <th class="col-img">VIEW</th>
+                        <th class="sortable" data-sort="category">
+                            CATEGORY <i class="fa-solid fa-sort sort-icon"></i>
+                        </th>
+                        <th class="sortable" data-sort="shortDescription">
+                            SHORT DESC <i class="fa-solid fa-sort sort-icon"></i>
+                        </th>
+                        <th class="sortable" data-sort="description">
+                            FULL DESCRIPTION <i class="fa-solid fa-sort sort-icon"></i>
+                        </th>
+                        <th class="sortable active-asc" data-sort="partNumber">
+                            PART NUMBER <i class="fa-solid fa-sort-up sort-icon"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    </tbody>
+            </table>
+        </div>
+        <div class="footer-status">Showing <span id="showing-count">0</span> parts</div>
+    </div>
+
+    <div id="copyToast"><i class="fa-solid fa-check"></i> Part Number Copied!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
