@@ -7,29 +7,36 @@ let zoomLevel = Number(localStorage.getItem('zoomLevel'));
 if (isNaN(zoomLevel)) zoomLevel = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Theme Preference
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         document.querySelector('#btnTheme i').classList.replace('fa-sun', 'fa-moon');
     }
-    
-    // 2. Apply Initial Zoom
     applyZoom();
 
-    // 3. Fetch Data
     fetch('parts.json')
         .then(res => res.json())
         .then(data => {
             allParts = data;
-            // Added this line back to update the count
-            document.getElementById('total-count').innerText = allParts.length.toLocaleString();
+            updateStats(allParts); // Calculate Stats on Load
             applyFiltersAndSort();
         });
 
     setupEventListeners();
 });
 
-// --- CORE FUNCTIONS ---
+// --- NEW: STATS CALCULATOR ---
+function updateStats(data) {
+    const total = data.length;
+    const nf = data.filter(p => p.category === 'New Flyer').length;
+    const gillig = data.filter(p => p.category === 'Gillig').length;
+    const uni = data.filter(p => p.category === 'Universal').length;
+
+    // Animate the numbers (simple text update)
+    document.getElementById('stat-total').innerText = total.toLocaleString();
+    document.getElementById('stat-nf').innerText = nf.toLocaleString();
+    document.getElementById('stat-gillig').innerText = gillig.toLocaleString();
+    document.getElementById('stat-uni').innerText = uni.toLocaleString();
+}
 
 function applyFiltersAndSort() {
     const search = document.getElementById('searchInput').value.toLowerCase();
@@ -59,16 +66,28 @@ function applyFiltersAndSort() {
 function renderTable() {
     const tbody = document.getElementById('tableBody');
     const loadBtn = document.getElementById('btnLoadMore');
+    const emptyState = document.getElementById('noResults');
+    const tableEl = document.querySelector('.parts-table');
     
+    // Empty State Logic
+    if (filteredParts.length === 0) {
+        tableEl.style.display = 'none';
+        emptyState.style.display = 'block';
+        loadBtn.style.display = 'none';
+        document.getElementById('showing-count').innerText = "0";
+        return;
+    } else {
+        tableEl.style.display = 'table';
+        emptyState.style.display = 'none';
+    }
+
     const dataToShow = filteredParts.slice(0, displayLimit);
-    
     document.getElementById('showing-count').innerText = `${dataToShow.length} of ${filteredParts.length}`;
     tbody.innerHTML = '';
 
     dataToShow.forEach(p => {
         const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p.description + ' ' + p.partNumber)}`;
         
-        // Data-label attributes included for Mobile View
         const row = `
             <tr>
                 <td class="col-img" data-label="Image">
@@ -79,7 +98,7 @@ function renderTable() {
                 
                 <td data-label="Category"><span class="badge-cat ${p.category.replace(' ', '-').toLowerCase()}">${p.category}</span></td>
                 
-                <td data-label="Short Desc" style="font-weight:600; color:var(--text-primary); white-space:nowrap;">${p.shortDescription}</td>
+                <td data-label="Short Desc" style="font-weight:600; color:var(--text-primary);">${p.shortDescription}</td>
                 
                 <td data-label="Full Desc" class="col-desc" style="color:var(--text-secondary); font-size:0.85rem;">${p.description}</td>
                 
@@ -111,17 +130,19 @@ function copyToClipboard(text) {
 function updateSortIcons() {
     document.querySelectorAll('.sortable').forEach(th => {
         th.classList.remove('active-asc', 'active-desc');
-        th.querySelector('i').className = 'fa-solid fa-sort sort-icon';
+        th.querySelector('i').className = 'fa-solid fa-sort';
     });
-
     const activeHeader = document.querySelector(`.sortable[data-sort="${currentSort.column}"]`);
     if (activeHeader) {
+        const icon = activeHeader.querySelector('i');
         if (currentSort.direction === 'asc') {
             activeHeader.classList.add('active-asc');
-            activeHeader.querySelector('i').className = 'fa-solid fa-sort-up sort-icon';
+            icon.classList.remove('fa-sort');
+            icon.classList.add('fa-sort-up');
         } else {
             activeHeader.classList.add('active-desc');
-            activeHeader.querySelector('i').className = 'fa-solid fa-sort-down sort-icon';
+            icon.classList.remove('fa-sort');
+            icon.classList.add('fa-sort-down');
         }
     }
 }
@@ -129,10 +150,8 @@ function updateSortIcons() {
 function applyZoom() {
     const htmlRoot = document.documentElement;
     htmlRoot.classList.remove('zoom-medium', 'zoom-large');
-    
     if (zoomLevel === 1) htmlRoot.classList.add('zoom-medium');
     if (zoomLevel === 2) htmlRoot.classList.add('zoom-large');
-    
     localStorage.setItem('zoomLevel', zoomLevel);
 }
 
@@ -141,7 +160,6 @@ function setupEventListeners() {
         displayLimit = 100;
         applyFiltersAndSort();
     });
-
     document.querySelectorAll('.sortable').forEach(th => {
         th.addEventListener('click', () => {
             const column = th.getAttribute('data-sort');
@@ -156,7 +174,6 @@ function setupEventListeners() {
             applyFiltersAndSort();
         });
     });
-
     document.querySelectorAll('.filter-pill').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
@@ -166,17 +183,14 @@ function setupEventListeners() {
             applyFiltersAndSort();
         });
     });
-
     document.getElementById('btnLoadMore').addEventListener('click', () => {
         displayLimit += 100;
         renderTable();
     });
-
     document.getElementById('btnZoom').addEventListener('click', () => {
         zoomLevel = (zoomLevel + 1) % 3; 
         applyZoom();
     });
-
     document.getElementById('btnTheme').addEventListener('click', () => {
         const isDark = document.body.classList.toggle('dark-mode');
         const icon = document.querySelector('#btnTheme i');

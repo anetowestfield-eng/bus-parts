@@ -6,6 +6,7 @@
     <title>Parts Database</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -13,17 +14,36 @@
         <header class="top-header">
             <div class="header-left">
                 <h1><i class="fa-solid fa-bus logo-icon"></i> Parts Database</h1>
-                <p class="subtitle">Total Items: <span id="total-count">0</span></p>
+                <p class="subtitle">MARTA Transit Inventory System</p>
             </div>
             <div class="header-right">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search...">
+                    <input type="text" id="searchInput" placeholder="Search part #, desc, bin...">
                 </div>
                 <button id="btnZoom" class="icon-btn" title="Toggle Text Size">AA</button>
                 <button id="btnTheme" class="icon-btn" title="Toggle Dark Mode"><i class="fa-solid fa-sun"></i></button>
             </div>
         </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Parts</div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-value" id="stat-nf">0</div>
+                <div class="stat-label">New Flyer</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-value" id="stat-gillig">0</div>
+                <div class="stat-label">Gillig</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-value" id="stat-uni">0</div>
+                <div class="stat-label">Universal</div>
+            </div>
+        </div>
 
         <div class="controls-row">
             <div class="filter-section">
@@ -40,23 +60,20 @@
                 <thead>
                     <tr>
                         <th class="col-img">VIEW</th>
-                        <th class="sortable" data-sort="category">
-                            CATEGORY <i class="fa-solid fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" data-sort="shortDescription">
-                            SHORT DESC <i class="fa-solid fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" data-sort="description">
-                            FULL DESCRIPTION <i class="fa-solid fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable active-asc" data-sort="partNumber">
-                            PART NUMBER <i class="fa-solid fa-sort-up sort-icon"></i>
-                        </th>
+                        <th class="sortable" data-sort="category">CAT <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable" data-sort="shortDescription">ITEM NAME <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable" data-sort="description">FULL DESCRIPTION <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable active-asc" data-sort="partNumber">PART # <i class="fa-solid fa-sort-up"></i></th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
+            
+            <div id="noResults" class="empty-state" style="display: none;">
+                <i class="fa-regular fa-folder-open"></i>
+                <h3>No parts found</h3>
+                <p>Try searching for a different number or keyword.</p>
+            </div>
         </div>
 
         <div class="load-more-container">
@@ -66,7 +83,7 @@
         <div class="footer-status">Showing <span id="showing-count">0</span> parts</div>
     </div>
 
-    <div id="copyToast"><i class="fa-solid fa-check"></i> Part Number Copied!</div>
+    <div id="copyToast"><i class="fa-solid fa-check"></i> Copied!</div>
 
     <script src="script.js"></script>
 </body>
