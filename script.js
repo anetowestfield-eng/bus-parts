@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
             allParts = data;
-            // Removed the line updating total-count
             applyFiltersAndSort();
         });
 
@@ -67,21 +66,22 @@ function renderTable() {
     dataToShow.forEach(p => {
         const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p.description + ' ' + p.partNumber)}`;
         
+        // ADDED data-label attributes for Mobile View
         const row = `
             <tr>
-                <td class="col-img">
+                <td class="col-img" data-label="Image">
                     <a href="${googleUrl}" target="_blank" class="img-link" title="Search Image on Google">
                         <i class="fa-solid fa-image"></i>
                     </a>
                 </td>
                 
-                <td><span class="badge-cat ${p.category.replace(' ', '-').toLowerCase()}">${p.category}</span></td>
+                <td data-label="Category"><span class="badge-cat ${p.category.replace(' ', '-').toLowerCase()}">${p.category}</span></td>
                 
-                <td style="font-weight:600; color:var(--text-primary); white-space:nowrap;">${p.shortDescription}</td>
+                <td data-label="Short Desc" style="font-weight:600; color:var(--text-primary);">${p.shortDescription}</td>
                 
-                <td class="col-desc" style="color:var(--text-secondary); font-size:0.85rem;">${p.description}</td>
+                <td data-label="Full Desc" class="col-desc" style="color:var(--text-secondary); font-size:0.85rem;">${p.description}</td>
                 
-                <td>
+                <td data-label="Part Number">
                     <span class="part-btn" onclick="copyToClipboard('${p.partNumber}')" title="Click to Copy">
                         ${p.partNumber}
                     </span>
