@@ -5,10 +5,11 @@ INPUT_FILE = 'Part-Numbers.csv'
 OUTPUT_FILE = 'parts.json'
 
 # --- CONFIGURATION ---
-BRAND_KEYWORDS = {
-    'New Flyer': ['NEW FLYER', ' NF ', 'NF BUS', 'N.F.', '/NF', 'NF/'],
-    'Gillig': ['GILLIG']
-}
+# Regex Patterns for Aggressive Matching
+# \b = Word boundary (Start/End of a word)
+# NF\w* = Matches "NF" followed by any letters/numbers/dashes (e.g., NF, NF-ALL, NF-123)
+REGEX_NF = re.compile(r'\b(NEW FLYER|NF|N\.F\.)', re.IGNORECASE)
+REGEX_GILLIG = re.compile(r'\b(GILLIG)', re.IGNORECASE)
 
 UNIVERSAL_KEYWORDS = [
     'BOLT', 'NUT', 'WASHER', 'SCREW', 'RIVET', 'CLAMP', 'HOSE', 'FITTING', 
@@ -18,25 +19,25 @@ UNIVERSAL_KEYWORDS = [
 ]
 
 def get_category_and_brand(full_text):
-    text_upper = full_text.upper()
+    # 1. Check for Brands using Regex
+    # This catches "NF", "NF-ALL", "NF/BUS", etc.
+    has_nf = bool(REGEX_NF.search(full_text))
+    has_gillig = bool(REGEX_GILLIG.search(full_text))
     
-    # Check for presence of brands
-    has_nf = any(k in text_upper for k in BRAND_KEYWORDS['New Flyer'])
-    has_gillig = any(k in text_upper for k in BRAND_KEYWORDS['Gillig'])
-    
-    # 1. PRIORITY RULE: If it has BOTH, it is Universal (Multi-Brand)
+    # 2. PRIORITY RULE: If it has BOTH, it is Universal (Multi-Brand)
     if has_nf and has_gillig:
         return 'Universal', 'Multi-Brand'
 
-    # 2. Specific Brands
+    # 3. Specific Brands
     if has_nf: return 'New Flyer', 'New Flyer'
     if has_gillig: return 'Gillig', 'Gillig'
     
-    # 3. Universal Hardware Keywords
+    # 4. Universal Hardware Keywords
+    text_upper = full_text.upper()
     for word in UNIVERSAL_KEYWORDS:
         if word in text_upper: return 'Universal', 'Generic'
 
-    # 4. Fallback: Extract OEM brand if possible
+    # 5. Fallback: Extract OEM brand if possible
     brand_pattern = re.compile(r'OEM ONLY,?\s*([^,]+)')
     brand_match = brand_pattern.search(text_upper)
     extracted_brand = brand_match.group(1).strip() if brand_match else "Genuine"
@@ -67,7 +68,7 @@ def convert():
     
     bin_pattern = re.compile(r'([A-Z]-\d{3}-\d{3}-\d{2}-\d{2})')
 
-    print("Processing...")
+    print("Processing with updated NF/Gillig logic...")
     
     for line in lines[2:]:
         if line.startswith('BRO'):
