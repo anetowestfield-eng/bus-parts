@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
             allParts = data;
+            // Added this line back to update the count
+            document.getElementById('total-count').innerText = allParts.length.toLocaleString();
             applyFiltersAndSort();
         });
 
@@ -66,7 +68,7 @@ function renderTable() {
     dataToShow.forEach(p => {
         const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p.description + ' ' + p.partNumber)}`;
         
-        // ADDED data-label attributes for Mobile View
+        // Data-label attributes included for Mobile View
         const row = `
             <tr>
                 <td class="col-img" data-label="Image">
@@ -77,7 +79,7 @@ function renderTable() {
                 
                 <td data-label="Category"><span class="badge-cat ${p.category.replace(' ', '-').toLowerCase()}">${p.category}</span></td>
                 
-                <td data-label="Short Desc" style="font-weight:600; color:var(--text-primary);">${p.shortDescription}</td>
+                <td data-label="Short Desc" style="font-weight:600; color:var(--text-primary); white-space:nowrap;">${p.shortDescription}</td>
                 
                 <td data-label="Full Desc" class="col-desc" style="color:var(--text-secondary); font-size:0.85rem;">${p.description}</td>
                 
