@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MARTA Parts Database</title>
+    <title>Parts Database</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -12,8 +12,7 @@
     <div class="main-container">
         <header class="top-header">
             <div class="header-left">
-                <h1><i class="fa-solid fa-bus logo-icon"></i> MARTA Parts Database</h1>
-                <p class="subtitle">Official Inventory :: <span id="total-count">0</span> Items</p>
+                <h1><i class="fa-solid fa-bus logo-icon"></i> Parts Database</h1>
             </div>
             <div class="header-right">
                 <div class="search-box">
@@ -58,6 +57,11 @@
                     </tbody>
             </table>
         </div>
+
+        <div class="load-more-container">
+            <button id="btnLoadMore" class="load-more-btn">Load Next 100 Parts</button>
+        </div>
+        
         <div class="footer-status">Showing <span id="showing-count">0</span> parts</div>
     </div>
 

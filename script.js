@@ -1,29 +1,39 @@
 let allParts = [];
+let filteredParts = []; 
 let currentCategory = 'All';
 let currentSort = { column: 'partNumber', direction: 'asc' };
+let displayLimit = 100;
+let zoomLevel = Number(localStorage.getItem('zoomLevel'));
+if (isNaN(zoomLevel)) zoomLevel = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Theme Preference
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         document.querySelector('#btnTheme i').classList.replace('fa-sun', 'fa-moon');
     }
-    if (localStorage.getItem('zoom') === 'active') document.body.classList.add('zoomed');
+    
+    // 2. Apply Initial Zoom
+    applyZoom();
 
+    // 3. Fetch Data
     fetch('parts.json')
         .then(res => res.json())
         .then(data => {
             allParts = data;
-            document.getElementById('total-count').innerText = allParts.length.toLocaleString();
-            renderTable(getFilteredAndSortedData());
+            // Removed the line updating total-count
+            applyFiltersAndSort();
         });
 
     setupEventListeners();
 });
 
-function getFilteredAndSortedData() {
+// --- CORE FUNCTIONS ---
+
+function applyFiltersAndSort() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     
-    let filtered = allParts.filter(p => {
+    filteredParts = allParts.filter(p => {
         const matchesSearch = (
             p.partNumber.toLowerCase().includes(search) || 
             p.description.toLowerCase().includes(search) ||
@@ -33,7 +43,7 @@ function getFilteredAndSortedData() {
         return matchesSearch && matchesCat;
     });
 
-    filtered.sort((a, b) => {
+    filteredParts.sort((a, b) => {
         let valA = a[currentSort.column].toString().toLowerCase();
         let valB = b[currentSort.column].toString().toLowerCase();
         
@@ -42,23 +52,19 @@ function getFilteredAndSortedData() {
         return 0;
     });
 
-    return filtered;
+    renderTable();
 }
 
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        const toast = document.getElementById("copyToast");
-        toast.className = "show";
-        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
-    });
-}
-
-function renderTable(parts) {
+function renderTable() {
     const tbody = document.getElementById('tableBody');
-    document.getElementById('showing-count').innerText = parts.length.toLocaleString();
+    const loadBtn = document.getElementById('btnLoadMore');
+    
+    const dataToShow = filteredParts.slice(0, displayLimit);
+    
+    document.getElementById('showing-count').innerText = `${dataToShow.length} of ${filteredParts.length}`;
     tbody.innerHTML = '';
 
-    parts.slice(0, 100).forEach(p => {
+    dataToShow.forEach(p => {
         const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p.description + ' ' + p.partNumber)}`;
         
         const row = `
@@ -84,6 +90,20 @@ function renderTable(parts) {
         `;
         tbody.innerHTML += row;
     });
+
+    if (displayLimit >= filteredParts.length) {
+        loadBtn.style.display = 'none';
+    } else {
+        loadBtn.style.display = 'inline-block';
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById("copyToast");
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+    });
 }
 
 function updateSortIcons() {
@@ -104,9 +124,20 @@ function updateSortIcons() {
     }
 }
 
+function applyZoom() {
+    const htmlRoot = document.documentElement;
+    htmlRoot.classList.remove('zoom-medium', 'zoom-large');
+    
+    if (zoomLevel === 1) htmlRoot.classList.add('zoom-medium');
+    if (zoomLevel === 2) htmlRoot.classList.add('zoom-large');
+    
+    localStorage.setItem('zoomLevel', zoomLevel);
+}
+
 function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('keyup', () => {
-        renderTable(getFilteredAndSortedData());
+        displayLimit = 100;
+        applyFiltersAndSort();
     });
 
     document.querySelectorAll('.sortable').forEach(th => {
@@ -118,8 +149,9 @@ function setupEventListeners() {
                 currentSort.column = column;
                 currentSort.direction = 'asc';
             }
+            displayLimit = 100;
             updateSortIcons();
-            renderTable(getFilteredAndSortedData());
+            applyFiltersAndSort();
         });
     });
 
@@ -128,13 +160,19 @@ function setupEventListeners() {
             document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentCategory = btn.getAttribute('data-cat');
-            renderTable(getFilteredAndSortedData());
+            displayLimit = 100;
+            applyFiltersAndSort();
         });
     });
 
+    document.getElementById('btnLoadMore').addEventListener('click', () => {
+        displayLimit += 100;
+        renderTable();
+    });
+
     document.getElementById('btnZoom').addEventListener('click', () => {
-        const isZoomed = document.body.classList.toggle('zoomed');
-        localStorage.setItem('zoom', isZoomed ? 'active' : 'inactive');
+        zoomLevel = (zoomLevel + 1) % 3; 
+        applyZoom();
     });
 
     document.getElementById('btnTheme').addEventListener('click', () => {
